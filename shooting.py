@@ -36,6 +36,9 @@ class Shooting(GameState):
         self.bullet = pg.transform.scale(prepare.GFX['bullet'], (15,100))
         self.bullet_rect = self.bullet.get_rect()
         self.bullet_spacer = 5
+        self.clay_score = 0
+        self.clay_scores = []
+        self.clay_score_timer = 0.0
 
     def startup(self, persistent):
         self.persist = persistent
@@ -80,6 +83,9 @@ class Shooting(GameState):
                 self.switched = not self.switched
         elif self.world.h < 19:
             self.switched = False
+            
+        self.remove_clay_score()
+            
     def shoot(self):
         if self.cooldown < self.cooldown_duration:
             return
@@ -97,10 +103,23 @@ class Shooting(GameState):
             if clay.rect.collidepoint(pg.mouse.get_pos()):
                 clay.shatter()
                 self.add_points(clay)
-
+                self.add_clay_score()
+                
+    def add_clay_score(self):
+        lbl = Label("{}".format(int(self.clay_score)),{"topleft": (50, 5)}, font_size=64)
+        lbl.rect = pg.mouse.get_pos()
+        self.clay_scores.append(lbl)
+        
+    def remove_clay_score(self):
+        if pg.time.get_ticks()-self.clay_score_timer > 3000:
+            self.clay_score_timer = pg.time.get_ticks()
+            if self.clay_scores:
+                self.clay_scores.pop(0)
+                
     def add_points(self, clay):
         modifier = clay.z / 50.
         score = modifier * (100. / clay.speed)
+        self.clay_score = score
         self.score += score
 
     def draw(self, surface):
@@ -111,3 +130,5 @@ class Shooting(GameState):
         for rnd in range(self.bullets_in_mag):
             surface.blit(self.bullet, (rnd*self.bullet_rect.width + rnd*self.bullet_spacer,55))
         self.score_label.draw(surface)
+        for score in self.clay_scores:
+            score.draw(surface)
