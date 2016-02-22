@@ -56,10 +56,17 @@ class Shooting(GameState):
             if event.key == pg.K_ESCAPE:
                 self.quit = True
             elif event.key == pg.K_r:
-                self.bullets_in_mag = self.mag_size
-                prepare.SFX["reload"].play()
+                self.on_reload()
         elif event.type == pg.MOUSEBUTTONDOWN:
-            self.shoot()
+            if event.button == 1:
+                self.shoot()
+            elif event.button == 3:
+                self.on_reload()
+            
+    def on_reload(self):
+        self.bullets_in_mag = self.mag_size
+        prepare.SFX["reload"].play()
+            
 
     def update(self, dt):
         self.cooldown += dt
