@@ -26,14 +26,16 @@ class Shooting(GameState):
         self.world = World(True)
         self.cooldown = 0
         self.cooldown_duration = 250
-        self.clip_size = 10
-        self.bullets_in_clip = self.clip_size
-        self.cooldown_reload = 1000
+        self.mag_size = 4
+        self.bullets_in_mag = self.mag_size
         self.crosshairs_day = prepare.GFX['crosshairs_day']
         self.crosshairs_night = prepare.GFX['crosshairs_night']
         self.crosshairs = self.crosshairs_day
         self.crosshairs_rect = self.crosshairs.get_rect()
         self.switched = False
+        self.bullet = pg.transform.scale(prepare.GFX['bullet'], (15,100))
+        self.bullet_rect = self.bullet.get_rect()
+        self.bullet_spacer = 5
 
     def startup(self, persistent):
         self.persist = persistent
@@ -50,6 +52,9 @@ class Shooting(GameState):
         elif event.type == pg.KEYUP:
             if event.key == pg.K_ESCAPE:
                 self.quit = True
+            elif event.key == pg.K_r:
+                self.bullets_in_mag = self.mag_size
+                prepare.SFX["reload"].play()
         elif event.type == pg.MOUSEBUTTONDOWN:
             self.shoot()
 
@@ -79,12 +84,15 @@ class Shooting(GameState):
         if self.cooldown < self.cooldown_duration:
             return
         else:
-            prepare.SFX["gunshot"].play()
-            if self.bullets_in_clip:
-                self.bullets_in_clip -= 1
-                self.cooldown = 0
-            else:
-                self.cooldown = self.cooldown_reload
+            self.cooldown = 0
+        
+        if not self.bullets_in_mag:
+            return
+        else:
+            self.bullets_in_mag -= 1
+            
+        prepare.SFX["gunshot"].play()
+            
         for clay in [x for x in self.world.clays if not x.shattered]:
             if clay.rect.collidepoint(pg.mouse.get_pos()):
                 clay.shatter()
@@ -100,4 +108,6 @@ class Shooting(GameState):
         surface.fill(self.world.grass, self.world.ground_rect)
         self.world.all_sprites.draw(surface)
         surface.blit(self.crosshairs, self.crosshairs_rect)
+        for rnd in range(self.bullets_in_mag):
+            surface.blit(self.bullet, (rnd*self.bullet_rect.width + rnd*self.bullet_spacer,55))
         self.score_label.draw(surface)
