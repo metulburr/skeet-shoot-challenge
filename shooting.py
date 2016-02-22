@@ -88,8 +88,13 @@ class Shooting(GameState):
             if not self.switched:
                 prepare.SFX["clicker"].play()
                 self.switched = not self.switched
-        elif self.world.h < 19:
-            self.switched = False
+        #elif self.world.h < 19:
+        #    self.switched = False
+            
+        if self.world.h >= 6 and self.world.h < 19:
+            if self.switched:
+                prepare.SFX["clicker"].play()
+                self.switched = not self.switched
             
         self.remove_clay_score()
             
