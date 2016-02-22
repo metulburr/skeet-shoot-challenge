@@ -250,6 +250,7 @@ class World(object):
     def update(self, dt):
         self.dn_cycle.update(dt)
         h, m = self.dn_cycle.clock_time
+        self.h, self.m = h,m
         self.recolor(h, m)
         for c in self.celestials:
             c.update(dt, h, m)

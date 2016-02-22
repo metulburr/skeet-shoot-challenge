@@ -26,6 +26,14 @@ class Shooting(GameState):
         self.world = World(True)
         self.cooldown = 0
         self.cooldown_duration = 250
+        self.clip_size = 10
+        self.bullets_in_clip = self.clip_size
+        self.cooldown_reload = 1000
+        self.crosshairs_day = prepare.GFX['crosshairs_day']
+        self.crosshairs_night = prepare.GFX['crosshairs_night']
+        self.crosshairs = self.crosshairs_day
+        self.crosshairs_rect = self.crosshairs.get_rect()
+        self.switched = False
 
     def startup(self, persistent):
         self.persist = persistent
@@ -33,6 +41,7 @@ class Shooting(GameState):
         self.score_label = Label("{}".format(self.score),
                                            {"topleft": (5, 5)}, font_size=64)
         self.world.reset()
+        pg.mouse.set_visible(False)
 
     def get_event(self, event):
         if event.type == pg.QUIT:
@@ -55,13 +64,27 @@ class Shooting(GameState):
             self.done = True
             self.persist["score"] = int(self.score)
             self.next_state = "HIGHSCORES"
-
+        self.crosshairs_rect.center = pg.mouse.get_pos()
+        if self.world.nighttime:
+            self.crosshairs = self.crosshairs_night
+        else:
+            self.crosshairs = self.crosshairs_day
+        if self.world.h >= 19:
+            if not self.switched:
+                prepare.SFX["clicker"].play()
+                self.switched = not self.switched
+        elif self.world.h < 19:
+            self.switched = False
     def shoot(self):
         if self.cooldown < self.cooldown_duration:
             return
         else:
             prepare.SFX["gunshot"].play()
-            self.cooldown = 0
+            if self.bullets_in_clip:
+                self.bullets_in_clip -= 1
+                self.cooldown = 0
+            else:
+                self.cooldown = self.cooldown_reload
         for clay in [x for x in self.world.clays if not x.shattered]:
             if clay.rect.collidepoint(pg.mouse.get_pos()):
                 clay.shatter()
@@ -76,4 +99,5 @@ class Shooting(GameState):
         surface.fill(self.world.sky)
         surface.fill(self.world.grass, self.world.ground_rect)
         self.world.all_sprites.draw(surface)
+        surface.blit(self.crosshairs, self.crosshairs_rect)
         self.score_label.draw(surface)

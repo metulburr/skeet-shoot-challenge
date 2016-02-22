@@ -15,7 +15,7 @@ pg.display.set_caption(ORIGINAL_CAPTION)
 SCREEN = pg.display.set_mode(SCREEN_SIZE)
 SCREEN_RECT = SCREEN.get_rect()
 pg.mixer.set_num_channels(16)
-GFX = tools.load_all_gfx(os.path.join("resources", "graphics"))
+GFX = tools.load_all_gfx(os.path.join("resources", "graphics"), colorkey=(255,255,255))
 SFX = tools.load_all_sfx(os.path.join("resources", "sounds"))
 night_colors = [
         ("trees1", {(95, 137, 75): (6, 10, 5)}),

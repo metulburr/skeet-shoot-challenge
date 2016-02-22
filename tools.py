@@ -29,7 +29,7 @@ class _KwargMixin(object):
             setattr(self, setting, settings[setting])
 
 
-def load_all_gfx(directory,colorkey=(0,0,0),accept=(".png",".jpg",".bmp")):
+def load_all_gfx(directory,colorkey=(0,0,0),accept=(".png",".jpg",".bmp",'.gif')):
     graphics = {}
     for pic in os.listdir(directory):
         name,ext = os.path.splitext(pic)
